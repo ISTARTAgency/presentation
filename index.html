@@ -66,16 +66,17 @@ h3{font-weight:800;letter-spacing:-.01em;line-height:1.12;font-size:clamp(1.25re
 .hero .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:2em}
 .rubans{position:absolute;right:-8%;top:0;height:100%;width:min(62vw,880px);z-index:1;pointer-events:none}
 .rubans path{fill:none;stroke-linecap:round}
-.rb1{stroke:url(#gR);stroke-width:46;stroke-dasharray:1800;stroke-dashoffset:1800;animation:trace 2.2s var(--ease) .2s forwards,flotte 9s ease-in-out 2.4s infinite alternate}
-.rb2{stroke:var(--nuit);stroke-width:26;opacity:.9;stroke-dasharray:1800;stroke-dashoffset:1800;animation:trace 2.4s var(--ease) .5s forwards,flotte 11s ease-in-out 2.9s infinite alternate-reverse}
-.rb3{stroke:#fff;stroke-width:2;opacity:.6;stroke-dasharray:1800;stroke-dashoffset:1800;animation:trace 2.6s var(--ease) .7s forwards,flotte 9s ease-in-out 2.4s infinite alternate}
-.halo{position:absolute;right:4%;top:28%;width:min(40vw,520px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(231,23,21,.28),transparent 65%);filter:blur(10px);z-index:0;animation:respire 7s ease-in-out infinite alternate}
+.rb1{stroke:url(#gR);stroke-width:46;stroke-dasharray:1800;stroke-dashoffset:1800;animation:trace 2.2s var(--ease) .2s forwards}
+.rb2{stroke:var(--nuit);stroke-width:26;opacity:.9;stroke-dasharray:1800;stroke-dashoffset:1800;animation:trace 2.4s var(--ease) .5s forwards}
+.rb3{stroke:#fff;stroke-width:2;opacity:.6;stroke-dasharray:1800;stroke-dashoffset:1800;animation:trace 2.6s var(--ease) .7s forwards}
+.halo{position:absolute;right:4%;top:28%;width:min(40vw,520px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(231,23,21,.28),transparent 65%);filter:blur(10px);z-index:0}
 @keyframes trace{to{stroke-dashoffset:0}}
 @keyframes flotte{from{transform:translate(0,0) rotate(0)}to{transform:translate(-14px,18px) rotate(-1.2deg)}}
 @keyframes respire{from{transform:scale(.92);opacity:.75}to{transform:scale(1.08);opacity:1}}
 .descend{position:absolute;left:var(--pad);bottom:24px;z-index:2;display:flex;align-items:center;gap:.6em;font-weight:600;font-size:.9em;color:var(--gtxt);text-decoration:none}
+.descend{transition:opacity .4s}.descend.cache{opacity:0;pointer-events:none}
 .descend i{width:22px;height:34px;border:2px solid currentColor;border-radius:12px;position:relative}
-.descend i::after{content:"";position:absolute;left:50%;top:6px;width:4px;height:7px;margin-left:-2px;border-radius:2px;background:var(--rouge);animation:molette 1.6s ease-in-out infinite}
+.descend i::after{content:"";position:absolute;left:50%;top:6px;width:4px;height:7px;margin-left:-2px;border-radius:2px;background:var(--rouge);animation:molette 1.6s ease-in-out 3}
 @keyframes molette{0%{transform:translateY(0);opacity:1}70%{transform:translateY(10px);opacity:0}100%{opacity:0}}
 
 /* Quiz des freins */
@@ -281,7 +282,7 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.2)}
   </svg>
   <div class="inner">
     <p class="kick rv">I#START Agency, Beauvais</p>
-    <h1 class="rv">L'IA dans votre <span class="feutre draw" id="motwrap"><span class="mot" id="mot">entreprise</span><svg viewBox="0 0 352 35" preserveAspectRatio="none" aria-hidden="true"><path d="M0 27.2C66 10.2 139.3 34.4 212.6 17.5 285.9 .5 322.6 12.6 351.9 22.3"/></svg></span>, simplement.</h1>
+    <h1 class="rv">L'IA dans votre <span class="feutre draw">entreprise<svg viewBox="0 0 352 35" preserveAspectRatio="none" aria-hidden="true"><path d="M0 27.2C66 10.2 139.3 34.4 212.6 17.5 285.9 .5 322.6 12.6 351.9 22.3"/></svg></span>, simplement.</h1>
     <p class="lead rv">Nous installons l'intelligence artificielle dans les TPE et les PME. Et nous nous occupons aussi de votre communication.</p>
     <div class="acts rv">
       <a class="btn btn-r mag" href="#temps">Calculer mon temps perdu</a>
@@ -478,12 +479,9 @@ function scrollProg(){var h=document.documentElement;var p=h.scrollTop/((h.scrol
   $$('.nav a').forEach(function(a){a.classList.toggle('act',a===cur)});}
 window.addEventListener('scroll',scrollProg,{passive:true});scrollProg();
 
-/* Mot qui change dans le titre */
-var mots=['entreprise','équipe','quotidien','communication'],mi=0,mot=$('#mot'),wrap=$('#motwrap');
-if(!reduit)setInterval(function(){
-  mot.classList.add('out');wrap.classList.remove('draw');
-  setTimeout(function(){mi=(mi+1)%mots.length;mot.textContent=mots[mi];mot.classList.remove('out');void wrap.offsetWidth;wrap.classList.add('draw');},380);
-},3200);
+/* Indicateur de défilement : disparaît dès qu'on descend */
+var desc=$('.descend');function cacheDesc(){if(desc)desc.classList.toggle('cache',window.scrollY>80)}
+window.addEventListener('scroll',cacheDesc,{passive:true});cacheDesc();
 
 /* Boutons aimantés */
 if(!reduit&&window.matchMedia('(hover:hover)').matches){
@@ -541,7 +539,6 @@ $$('.pas').forEach(function(p){p.addEventListener('click',function(){main();etap
 $('#suiv').addEventListener('click',function(){main();etape(si+1)});
 $('#prec').addEventListener('click',function(){main();etape(si-1)});
 etape(0);
-if(!reduit&&'IntersectionObserver' in window){var io2=new IntersectionObserver(function(es){if(es[0].isIntersecting&&!touche){auto=setInterval(function(){etape(si+1)},3600);io2.disconnect()}},{threshold:.5});io2.observe($('#piste'));}
 
 /* Journée */
 var M=[
